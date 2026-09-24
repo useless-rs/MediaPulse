@@ -5,7 +5,7 @@ description = "A self-contained native media player built around mpv"
 readme = "README.md"
 keywords = ["mediapulse", "mpv", "player", "multimedia"]
 repository.workspace = true
-version.workspace = true
+version = "0.1.1"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -45,6 +45,7 @@ raw-window-handle = "0.6.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.17"
+yoke-derive = "=0.8.2"
 
 [dev-dependencies]
 tempfile = "3.24.0"
