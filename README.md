@@ -28,6 +28,16 @@ bun run tauri build
 
 The release bundle contains the frontend, desktop executable, bundled mpv sidecar, and license metadata. Native libmpv runtimes remain platform-specific: the Linux package declares `libmpv2`, while release automation must supply the matching runtime for each target platform.
 
+## Install from Cargo
+
+Install the published desktop binary and its companion `mp` launcher with:
+
+```bash
+cargo install mediapulse
+```
+
+The default `libmpv` feature requires the platform mpv development package and Tauri system libraries at compile time. Linux distributions commonly provide `libmpv-dev`, `libwebkit2gtk-4.1-dev`, and `libgtk-3-dev`; see the Tauri prerequisites for your platform. The Cargo-installed desktop binary uses the system libmpv runtime, while downloadable desktop bundles carry their platform-native sidecar assets.
+
 ## `mp` CLI
 
 The `mp` binary is installed beside the desktop executable in release bundles. It preserves the original argument vector and never searches `PATH` for an engine.

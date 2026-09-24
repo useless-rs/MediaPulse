@@ -11,7 +11,13 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 publish = true
-exclude = ["binaries/*"]
+exclude = [
+  "binaries/*",
+  "gen/**",
+  "tauri.linux.conf.json",
+  "tauri.macos.conf.json",
+  "tauri.windows.conf.json",
+]
 default-run = "mediapulse"
 
 [features]
