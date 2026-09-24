@@ -26,11 +26,7 @@ jobs:
           - name: macOS dmg
             os: macos-13
             bundle: dmg
-          - name: Windows NSIS
-            os: windows-2022
-            bundle: nsis
     runs-on: ${{ matrix.os }}
-    if: ${{ matrix.os != 'windows-2022' || vars.MPV_WINDOWS_BIN_URL != '' }}
     timeout-minutes: 60
     steps:
       - name: Check out repository
@@ -70,15 +66,68 @@ jobs:
           echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
           echo "LDFLAGS=-L$(brew --prefix mpv)/lib ${LDFLAGS:-}" >> "$GITHUB_ENV"
 
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        run: bun run build
+
+      - name: Stage Linux or macOS mpv sidecar
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p src-tauri/binaries
+          host_triple="$(rustc -vV | sed -n 's/^host: //p')"
+          if [[ "$(uname -s)" == "Darwin" ]]; then
+            cp "$(brew --prefix mpv)/bin/mpv" "src-tauri/binaries/mpv-${host_triple}"
+          else
+            cp /usr/bin/mpv "src-tauri/binaries/mpv-${host_triple}"
+          fi
+          chmod +x "src-tauri/binaries/mpv-${host_triple}"
+
+      - name: Build Tauri bundle
+        run: bun run tauri build --bundles ${{ matrix.bundle }}
+
+      - name: Upload platform bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediapulse-${{ matrix.name }}
+          path: |
+            target/release/bundle/**
+          if-no-files-found: error
+
+  windows:
+    name: Bundle Windows NSIS
+    if: ${{ vars.MPV_WINDOWS_BIN_URL != '' }}
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: . -> target
+
       - name: Require Windows native mpv assets
-        if: runner.os == 'Windows'
         env:
           MPV_WINDOWS_BIN_URL: ${{ vars.MPV_WINDOWS_BIN_URL }}
           MPV_WINDOWS_LIB_URL: ${{ vars.MPV_WINDOWS_LIB_URL }}
         shell: pwsh
         run: |
           if ([string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_BIN_URL) -or [string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_LIB_URL)) {
-            throw "Windows releases require MPV_WINDOWS_BIN_URL and MPV_WINDOWS_LIB_URL secrets containing the mpv.exe and libmpv development archives."
+            throw "Windows releases require MPV_WINDOWS_BIN_URL and MPV_WINDOWS_LIB_URL variables containing the mpv.exe and libmpv development archives."
           }
           New-Item -ItemType Directory -Force src-tauri/binaries | Out-Null
           New-Item -ItemType Directory -Force .release-assets/mpv | Out-Null
@@ -101,27 +150,13 @@ jobs:
       - name: Build frontend
         run: bun run build
 
-      - name: Stage Linux or macOS mpv sidecar
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p src-tauri/binaries
-          host_triple="$(rustc -vV | sed -n 's/^host: //p')"
-          if [[ "$(uname -s)" == "Darwin" ]]; then
-            cp "$(brew --prefix mpv)/bin/mpv" "src-tauri/binaries/mpv-${host_triple}"
-          else
-            cp /usr/bin/mpv "src-tauri/binaries/mpv-${host_triple}"
-          fi
-          chmod +x "src-tauri/binaries/mpv-${host_triple}"
-
       - name: Build Tauri bundle
-        run: bun run tauri build --bundles ${{ matrix.bundle }}
+        run: bun run tauri build --bundles nsis
 
       - name: Upload platform bundle
         uses: actions/upload-artifact@v4
         with:
-          name: mediapulse-${{ matrix.name }}
+          name: mediapulse-Windows-NSIS
           path: |
             target/release/bundle/**
           if-no-files-found: error
