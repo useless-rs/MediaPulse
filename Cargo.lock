@@ -1924,7 +1924,7 @@ dependencies = [
 
 [[package]]
 name = "mediapulse"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "mediapulse-core",
  "raw-window-handle",
@@ -1936,6 +1936,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tempfile",
  "thiserror 2.0.21",
+ "yoke-derive",
 ]
 
 [[package]]
