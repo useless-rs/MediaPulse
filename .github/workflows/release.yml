@@ -30,6 +30,7 @@ jobs:
             os: windows-2022
             bundle: nsis
     runs-on: ${{ matrix.os }}
+    if: ${{ matrix.os != 'windows-2022' || vars.MPV_WINDOWS_BIN_URL != '' }}
     timeout-minutes: 60
     steps:
       - name: Check out repository
@@ -72,8 +73,8 @@ jobs:
       - name: Require Windows native mpv assets
         if: runner.os == 'Windows'
         env:
-          MPV_WINDOWS_BIN_URL: ${{ secrets.MPV_WINDOWS_BIN_URL }}
-          MPV_WINDOWS_LIB_URL: ${{ secrets.MPV_WINDOWS_LIB_URL }}
+          MPV_WINDOWS_BIN_URL: ${{ vars.MPV_WINDOWS_BIN_URL }}
+          MPV_WINDOWS_LIB_URL: ${{ vars.MPV_WINDOWS_LIB_URL }}
         shell: pwsh
         run: |
           if ([string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_BIN_URL) -or [string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_LIB_URL)) {
