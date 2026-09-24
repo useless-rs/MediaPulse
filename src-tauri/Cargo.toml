@@ -1,0 +1,47 @@
+[package]
+name = "mediapulse"
+categories = ["multimedia::video", "command-line-utilities"]
+description = "A self-contained native media player built around mpv"
+readme = "README.md"
+keywords = ["mediapulse", "mpv", "player", "multimedia"]
+repository.workspace = true
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = true
+exclude = ["binaries/*"]
+default-run = "mediapulse"
+
+[features]
+default = ["libmpv"]
+libmpv = ["mediapulse-core/libmpv"]
+sidecar = ["mediapulse-core/sidecar"]
+
+[lib]
+name = "mediapulse_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "mp"
+path = "src/bin/mp.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["macos-private-api"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+mediapulse-core = { version = "0.1.0", path = "../crates/mediapulse-core", default-features = false }
+raw-window-handle = "0.6.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2.0.17"
+
+[dev-dependencies]
+tempfile = "3.24.0"
+
+[lints]
+workspace = true

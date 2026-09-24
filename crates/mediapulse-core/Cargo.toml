@@ -1,0 +1,29 @@
+[package]
+name = "mediapulse-core"
+description = "Shared mpv playback, command, and sidecar management for MediaPulse"
+readme = "README.md"
+categories = ["multimedia::video", "api-bindings"]
+keywords = ["mediapulse", "mpv", "libmpv", "player"]
+repository.workspace = true
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+libmpv = ["dep:rsmpv"]
+sidecar = []
+
+[dependencies]
+rsmpv = { version = "0.2.1", features = ["render"], optional = true }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0.17"
+
+[dev-dependencies]
+proptest = "1.10.0"
+tempfile = "3.24.0"
+
+[lints]
+workspace = true

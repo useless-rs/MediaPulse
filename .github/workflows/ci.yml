@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Frontend and Rust quality gates
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+          components: rustfmt, clippy
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: . -> target
+
+      - name: Install Tauri and mpv build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libayatana-appindicator3-dev \
+            libmpv-dev \
+            librsvg2-dev \
+            libwebkit2gtk-4.1-dev \
+            patchelf \
+            mpv
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run frontend checks
+        run: bun run check
+
+      - name: Build frontend into Tauri dist
+        run: bun run build
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run strict Rust Clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run Rust tests
+        run: cargo test --workspace --all-features
+
+      - name: Verify declared Rust 1.85 compatibility
+        run: cargo +1.85.0 check --workspace --all-features
+
+      - name: Package and verify mediapulse-core
+        run: cargo package -p mediapulse-core --offline
+
+      - name: Assemble app crate with local core patch
+        run: cargo package -p mediapulse --no-verify --config 'patch.crates-io.mediapulse-core.path="crates/mediapulse-core"'
+
+      - name: Stage Linux mpv sidecar for Tauri validation
+        run: |
+          mkdir -p src-tauri/binaries
+          cp /usr/bin/mpv src-tauri/binaries/mpv-x86_64-unknown-linux-gnu
+          chmod +x src-tauri/binaries/mpv-x86_64-unknown-linux-gnu
+
+      - name: Validate Tauri release compilation and sidecar resolution
+        run: bunx tauri build --no-bundle --config '{"build":{"beforeBuildCommand":""}}'

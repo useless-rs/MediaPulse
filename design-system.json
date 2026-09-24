@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "MediaPulse",
+  "version": "1.0.0",
+  "reference": {
+    "icon": "user-supplied Apple Creator Studio icon grid",
+    "player": "user-supplied mpv OSC overlay screenshot",
+    "native": "Apple HIG"
+  },
+  "identity": {
+    "signature": "Full-canvas video with a quiet translucent mpv OSC bar",
+    "surfaceIntent": "Video is primary; overlays appear only on demand",
+    "accentPolicy": "One luminous cyan-blue accent for focus, active progress, selection, and app-icon glyph"
+  },
+  "color": {
+    "stage": "#244f78",
+    "stageDeep": "#163757",
+    "controls": "rgb(10 35 64 / 82%)",
+    "controlsHover": "rgb(22 56 91 / 90%)",
+    "sidebar": "rgb(18 31 46 / 76%)",
+    "sheet": "rgb(24 31 40 / 88%)",
+    "textPrimary": "#f7fbff",
+    "textSecondary": "#b9cad8",
+    "textMuted": "#8197aa",
+    "borderGlass": "rgb(255 255 255 / 12%)",
+    "borderStrong": "rgb(255 255 255 / 20%)",
+    "accent": "#59d7ff",
+    "accentPressed": "#35bfe8",
+    "destructive": "#ff6969",
+    "scrim": "rgb(4 9 15 / 42%)"
+  },
+  "typography": {
+    "ui": "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable', 'Helvetica Neue', sans-serif",
+    "numeric": "ui-monospace, 'SFMono-Regular', 'Cascadia Mono', monospace",
+    "windowTitle": { "size": 13, "weight": 600, "lineHeight": 1.2, "trackingEm": -0.01 },
+    "controlTime": { "size": 12, "weight": 500, "lineHeight": 1.25, "trackingEm": 0.01 },
+    "sectionTitle": { "size": 17, "weight": 600, "lineHeight": 1.25, "trackingEm": -0.015 },
+    "body": { "size": 14, "weight": 400, "lineHeight": 1.45, "trackingEm": 0 },
+    "controlLabel": { "size": 12, "weight": 500, "lineHeight": 1.3, "trackingEm": 0.005 },
+    "emptyTitle": { "size": 20, "weight": 600, "lineHeight": 1.25, "trackingEm": -0.02 }
+  },
+  "spacing": {
+    "unit": 4,
+    "scale": { "1": 4, "2": 8, "3": 12, "4": 16, "5": 20, "6": 24, "8": 32, "10": 40 }
+  },
+  "layout": {
+    "titlebarMac": 38,
+    "titlebarOther": 40,
+    "playlistDesktop": 320,
+    "playlistCompact": 288,
+    "settingsMaxWidth": 440,
+    "settingsMaxHeight": "70dvh",
+    "settingsViewportInset": 20,
+    "controlBar": {
+      "maxWidth": 584,
+      "height": 90,
+      "bottom": 24,
+      "radius": 12,
+      "sidePadding": 12,
+      "topRowHeight": 44,
+      "timelineRowHeight": 24,
+      "controlGap": 12,
+      "centerGap": 16,
+      "rightGap": 16
+    }
+  },
+  "motion": {
+    "microMs": 120,
+    "standardMs": 220,
+    "emphasisMs": 380,
+    "autoHideMs": 2500,
+    "exitMs": 220,
+    "spring": { "stiffness": 420, "damping": 32, "mass": 0.8 },
+    "reducedMotion": "Remove transforms and spring overshoot; use immediate or opacity-only transitions"
+  },
+  "components": {
+    "nativeTitlebar": {
+      "variants": ["macos", "windows-linux"],
+      "states": ["default", "dragging", "focus", "pressed-close"]
+    },
+    "osc": {
+      "states": [
+        "default",
+        "hover",
+        "pressed",
+        "focus",
+        "dragging",
+        "disabled",
+        "loading",
+        "error"
+      ],
+      "autoHideExceptions": [
+        "hover",
+        "focus",
+        "paused",
+        "panel-open",
+        "buffering",
+        "reduced-motion"
+      ]
+    },
+    "rangeSlider": {
+      "variants": ["volume", "progress"],
+      "states": ["default", "hover", "focus-visible", "active", "disabled"]
+    },
+    "playlist": {
+      "variants": ["hidden", "open", "pinned"],
+      "states": ["empty", "populated", "selected", "loading", "error"]
+    },
+    "settingsSheet": {
+      "variants": ["playback", "audio", "video", "shortcuts", "about"],
+      "states": ["opening", "open", "switching", "closing", "error"]
+    },
+    "playlistRow": {
+      "states": ["default", "hover", "selected", "focus-visible", "playing", "error"]
+    },
+    "emptyStage": { "states": ["no-media", "loading", "error"] }
+  },
+  "accessibility": {
+    "target": "WCAG 2.2 AA",
+    "minimumTargetPx": 36,
+    "focusRing": "2px accent with 2px offset",
+    "keyboardShortcutsRespectInputs": true,
+    "preserveAspectRatio": true,
+    "reducedMotionRequired": true
+  },
+  "acceptedDebt": [
+    {
+      "item": "Native renderer packaging is platform-specific",
+      "reason": "mpv native libraries have different packaging and signing rules per OS",
+      "exit": "Build each supported target in CI"
+    },
+    {
+      "item": "cargo install cannot embed every target's native engine in one portable artifact",
+      "reason": "crates.io distributes source or target-built binaries, not Tauri bundles",
+      "exit": "Document bundle-first installation and native cargo prerequisites"
+    }
+  ]
+}

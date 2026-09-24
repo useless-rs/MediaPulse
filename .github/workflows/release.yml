@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bundle:
+    name: Bundle ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux deb
+            os: ubuntu-22.04
+            bundle: deb
+          - name: macOS dmg
+            os: macos-13
+            bundle: dmg
+          - name: Windows NSIS
+            os: windows-2022
+            bundle: nsis
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.0
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: . -> target
+
+      - name: Install Linux native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libayatana-appindicator3-dev \
+            libmpv-dev \
+            librsvg2-dev \
+            libwebkit2gtk-4.1-dev \
+            patchelf \
+            mpv
+
+      - name: Install macOS native dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install mpv
+          echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$(brew --prefix mpv)/lib ${LDFLAGS:-}" >> "$GITHUB_ENV"
+
+      - name: Require Windows native mpv assets
+        if: runner.os == 'Windows'
+        env:
+          MPV_WINDOWS_BIN_URL: ${{ secrets.MPV_WINDOWS_BIN_URL }}
+          MPV_WINDOWS_LIB_URL: ${{ secrets.MPV_WINDOWS_LIB_URL }}
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_BIN_URL) -or [string]::IsNullOrWhiteSpace($env:MPV_WINDOWS_LIB_URL)) {
+            throw "Windows releases require MPV_WINDOWS_BIN_URL and MPV_WINDOWS_LIB_URL secrets containing the mpv.exe and libmpv development archives."
+          }
+          New-Item -ItemType Directory -Force src-tauri/binaries | Out-Null
+          New-Item -ItemType Directory -Force .release-assets/mpv | Out-Null
+          Invoke-WebRequest -Uri $env:MPV_WINDOWS_BIN_URL -OutFile .release-assets/mpv/mpv.zip
+          Invoke-WebRequest -Uri $env:MPV_WINDOWS_LIB_URL -OutFile .release-assets/mpv/libmpv.zip
+          Expand-Archive -Path .release-assets/mpv/mpv.zip -DestinationPath .release-assets/mpv/bin -Force
+          Expand-Archive -Path .release-assets/mpv/libmpv.zip -DestinationPath .release-assets/mpv/lib -Force
+          $hostTriple = (rustc -vV | Select-String '^host:').ToString().Split(':', 2)[1].Trim()
+          $mpv = Get-ChildItem .release-assets/mpv/bin -Filter mpv.exe -Recurse | Select-Object -First 1
+          if ($null -eq $mpv) { throw "The MPV_WINDOWS_BIN_URL archive does not contain mpv.exe" }
+          Copy-Item $mpv.FullName "src-tauri/binaries/mpv-$hostTriple.exe"
+          $env:LIB = "$(Resolve-Path .release-assets/mpv/lib);$env:LIB"
+          $env:PATH = "$(Resolve-Path .release-assets/mpv/bin);$env:PATH"
+          "LIB=$env:LIB" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        run: bun run build
+
+      - name: Stage Linux or macOS mpv sidecar
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p src-tauri/binaries
+          host_triple="$(rustc -vV | sed -n 's/^host: //p')"
+          if [[ "$(uname -s)" == "Darwin" ]]; then
+            cp "$(brew --prefix mpv)/bin/mpv" "src-tauri/binaries/mpv-${host_triple}"
+          else
+            cp /usr/bin/mpv "src-tauri/binaries/mpv-${host_triple}"
+          fi
+          chmod +x "src-tauri/binaries/mpv-${host_triple}"
+
+      - name: Build Tauri bundle
+        run: bun run tauri build --bundles ${{ matrix.bundle }}
+
+      - name: Upload platform bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediapulse-${{ matrix.name }}
+          path: |
+            target/release/bundle/**
+          if-no-files-found: error

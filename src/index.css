@@ -1,0 +1,89 @@
+@import "tailwindcss" source(none);
+@import "./styles/shell.css";
+@import "./styles/controls.css";
+@import "./styles/playlist.css";
+@import "./styles/settings.css";
+
+@source "./";
+@source "../index.html";
+
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Helvetica Neue",
+    sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", monospace;
+
+  --color-stage: #244f78;
+  --color-stage-deep: #163757;
+  --color-controls: rgb(10 35 64 / 82%);
+  --color-controls-hover: rgb(22 56 91 / 90%);
+  --color-sidebar: rgb(18 31 46 / 76%);
+  --color-sheet: rgb(24 31 40 / 88%);
+  --color-text-primary: #f7fbff;
+  --color-text-secondary: #b9cad8;
+  --color-text-muted: #8197aa;
+  --color-border-glass: rgb(255 255 255 / 12%);
+  --color-border-strong: rgb(255 255 255 / 20%);
+  --color-accent: #59d7ff;
+  --color-accent-pressed: #35bfe8;
+  --color-destructive: #ff6969;
+  --color-scrim: rgb(4 9 15 / 42%);
+
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-control: 12px;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  background: transparent;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  color: var(--color-text-primary);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: var(--color-text-primary);
+  background: rgb(89 215 255 / 28%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
