@@ -35,6 +35,12 @@ describe("MediaPulse player", () => {
     mocks.openMedia.mockResolvedValue([])
   })
 
+  it("renders the approved MediaPulse brand mark", () => {
+    const { container } = render(<App />)
+
+    expect(container.querySelectorAll('svg[aria-label="MediaPulse"]')).toHaveLength(2)
+  })
+
   it("opens selected media and exposes it in the playlist", async () => {
     const user = userEvent.setup()
     mocks.openMedia.mockResolvedValue(["/media/creator-reference.mkv"])
