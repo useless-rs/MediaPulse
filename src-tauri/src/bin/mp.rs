@@ -12,6 +12,11 @@ const RESOURCE_DIR_ENV: &str = "MEDIAPULSE_RESOURCE_DIR";
 enum CliError {
     #[error(transparent)]
     Sidecar(#[from] SidecarError),
+    #[error(
+        "no usable mpv engine was found. Cargo installs do not include native mpv; \
+         set MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv or use a MediaPulse desktop bundle. {0}"
+    )]
+    MissingSidecar(SidecarError),
     #[error("could not locate the MediaPulse executable: {0}")]
     CurrentExecutable(std::io::Error),
     #[error("could not start bundled mpv at {path}: {source}")]
@@ -40,7 +45,13 @@ fn run() -> Result<i32, CliError> {
         .map_or_else(|| PathBuf::from("."), PathBuf::from);
     let resource_dir = env::var_os(RESOURCE_DIR_ENV).map_or(executable_dir.clone(), PathBuf::from);
     let explicit = env::var_os(SIDECAR_PATH_ENV).map(PathBuf::from);
-    let sidecar = resolve_sidecar_path(explicit.as_deref(), &executable, &resource_dir)?;
+    let sidecar =
+        resolve_sidecar_path(explicit.as_deref(), &executable, &resource_dir).map_err(|error| {
+            match &error {
+                SidecarError::MissingExplicit { .. } => CliError::Sidecar(error),
+                SidecarError::NotFound { .. } => CliError::MissingSidecar(error),
+            }
+        })?;
 
     let status = Command::new(&sidecar)
         .args(invocation.engine_args())

@@ -92,9 +92,9 @@ fn mp_never_falls_back_to_system_path() {
         .expect("run mp");
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(
-        String::from_utf8(output.stderr)
-            .expect("UTF-8 stderr")
-            .contains("bundled mpv sidecar was not found")
-    );
+    let stderr = String::from_utf8(output.stderr).expect("UTF-8 stderr");
+    assert!(stderr.contains("Cargo installs do not include native mpv"));
+    assert!(stderr.contains("MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv"));
+    assert!(stderr.contains("MediaPulse desktop bundle"));
+    assert!(stderr.contains("bundled mpv sidecar was not found"));
 }
