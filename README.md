@@ -88,9 +88,10 @@ cargo test --workspace --all-features
 
 ## Platform notes
 
-- Video is embedded through native window handles. On Linux that currently
-  means X11; under Wayland the app runs but cannot embed video into its own
-  window yet.
+- Video is embedded into the app window through native window handles, which
+  means X11. Under Wayland there is no handle to hand to mpv, so the video
+  opens in mpv's own window beside the app instead. Playback, the playlist and
+  the controls behave the same either way.
 - Bundled builds carry the mpv build for their own platform. If you are on
   Linux, the `.deb`/`.AppImage` expect `libmpv2` at runtime.
 

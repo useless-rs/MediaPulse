@@ -50,6 +50,25 @@ impl PlaybackBackend for StubBackend {
     }
 }
 
+fn invoke<W: AsRef<tauri::Webview<tauri::test::MockRuntime>>>(
+    webview: &W,
+    cmd: &str,
+    body: serde_json::Value,
+) -> Result<tauri::ipc::InvokeResponseBody, serde_json::Value> {
+    get_ipc_response(
+        webview,
+        InvokeRequest {
+            cmd: cmd.into(),
+            callback: tauri::ipc::CallbackFn(0),
+            error: tauri::ipc::CallbackFn(1),
+            url: "tauri://localhost".parse().expect("invoke url"),
+            body: tauri::ipc::InvokeBody::Json(body),
+            headers: HeaderMap::new(),
+            invoke_key: INVOKE_KEY.to_string(),
+        },
+    )
+}
+
 #[test]
 fn load_media_resolves_managed_state_and_dispatches_to_the_backend() {
     let backend = Arc::new(StubBackend::default());
@@ -59,22 +78,15 @@ fn load_media_resolves_managed_state_and_dispatches_to_the_backend() {
         .build(mock_context(noop_assets()))
         .expect("mock app");
 
-    let webview = tauri::WebviewWindowBuilder::new(&app, "main", WebviewUrl::default())
+    let window = tauri::WebviewWindowBuilder::new(&app, "main", WebviewUrl::default())
         .build()
-        .expect("mock webview");
+        .expect("mock window");
 
     let source = "/tmp/opencode/mediapulse-ipc-fixture.mp4";
-    let response = get_ipc_response(
-        &webview,
-        InvokeRequest {
-            cmd: "load_media".into(),
-            callback: tauri::ipc::CallbackFn(0),
-            error: tauri::ipc::CallbackFn(1),
-            url: "tauri://localhost".parse().expect("invoke url"),
-            body: tauri::ipc::InvokeBody::Json(serde_json::json!({ "source": source })),
-            headers: HeaderMap::new(),
-            invoke_key: INVOKE_KEY.to_string(),
-        },
+    let response = invoke(
+        &window,
+        "load_media",
+        serde_json::json!({ "source": source }),
     );
 
     assert!(
