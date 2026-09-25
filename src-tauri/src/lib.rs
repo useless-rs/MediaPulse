@@ -1,5 +1,6 @@
 mod commands;
 mod events;
+mod locale;
 mod state;
 mod windowing;
 
@@ -41,6 +42,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 Err(WindowError::Unsupported) => None,
                 Err(error) => return Err(Box::new(error)),
             };
+            locale::set_numeric_c()?;
             let state = Arc::new(AppState::new(window_id, bundled_sidecar())?);
             if !app.manage(state.clone()) {
                 return Err(std::io::Error::other("MediaPulse state was already managed").into());
