@@ -5,7 +5,7 @@ description = "A self-contained native media player built around mpv"
 readme = "README.md"
 keywords = ["mediapulse", "mpv", "player", "multimedia"]
 repository.workspace = true
-version = "0.1.1"
+version = "0.1.3"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -41,6 +41,7 @@ tauri = { version = "2", features = ["macos-private-api"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 mediapulse-core = { version = "0.1.0", path = "../crates/mediapulse-core", default-features = false }
+libc = "0.2.189"
 raw-window-handle = "0.6.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

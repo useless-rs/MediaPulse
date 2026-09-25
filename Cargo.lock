@@ -1924,8 +1924,9 @@ dependencies = [
 
 [[package]]
 name = "mediapulse"
-version = "0.1.1"
+version = "0.1.3"
 dependencies = [
+ "libc",
  "mediapulse-core",
  "raw-window-handle",
  "serde",
