@@ -76,6 +76,54 @@ fn mp_forwards_list_options_to_the_bundled_engine() {
 }
 
 #[test]
+fn mp_help_and_version_work_without_an_engine() {
+    let temp = tempdir().expect("temp directory");
+    let isolated_executable = temp.path().join("mp");
+    fs::copy(env!("CARGO_BIN_EXE_mp"), &isolated_executable).expect("copy mp executable");
+    set_permissions(&isolated_executable, std::fs::Permissions::from_mode(0o755))
+        .expect("mp permissions");
+
+    for flag in ["--help", "-h", "--version", "-V"] {
+        let output = Command::new(&isolated_executable)
+            .env_remove("MEDIAPULSE_MPV_PATH")
+            .env_remove("MEDIAPULSE_RESOURCE_DIR")
+            .env("PATH", "")
+            .arg(flag)
+            .output()
+            .expect("run mp");
+
+        assert_eq!(
+            output.status.code(),
+            Some(0),
+            "{flag} must succeed without an mpv engine"
+        );
+        let stdout = String::from_utf8(output.stdout).expect("UTF-8 stdout");
+        assert!(stdout.contains(env!("CARGO_PKG_VERSION")));
+    }
+}
+
+#[test]
+fn mp_without_arguments_prints_usage_instead_of_a_bare_engine_error() {
+    let temp = tempdir().expect("temp directory");
+    let isolated_executable = temp.path().join("mp");
+    fs::copy(env!("CARGO_BIN_EXE_mp"), &isolated_executable).expect("copy mp executable");
+    set_permissions(&isolated_executable, std::fs::Permissions::from_mode(0o755))
+        .expect("mp permissions");
+
+    let output = Command::new(&isolated_executable)
+        .env_remove("MEDIAPULSE_MPV_PATH")
+        .env_remove("MEDIAPULSE_RESOURCE_DIR")
+        .env("PATH", "")
+        .output()
+        .expect("run mp");
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8(output.stderr).expect("UTF-8 stderr");
+    assert!(stderr.contains("Usage:"));
+    assert!(stderr.contains("MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv"));
+}
+
+#[test]
 fn mp_never_falls_back_to_system_path() {
     let temp = tempdir().expect("temp directory");
     let isolated_executable = temp.path().join("mp");
@@ -87,7 +135,7 @@ fn mp_never_falls_back_to_system_path() {
         .env_remove("MEDIAPULSE_MPV_PATH")
         .env_remove("MEDIAPULSE_RESOURCE_DIR")
         .env("PATH", "")
-        .arg("--version")
+        .arg("video.mkv")
         .output()
         .expect("run mp");
 
