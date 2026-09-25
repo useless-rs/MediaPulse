@@ -11,41 +11,35 @@ export function MediaPulseIcon({ className }: MediaPulseIconProps) {
       aria-label="MediaPulse"
       focusable="false"
     >
-      <rect x="48" y="48" width="928" height="928" rx="236" fill="#1b2027" />
+      <rect x="56" y="56" width="912" height="912" rx="224" fill="#202832" />
       <rect
-        x="66"
-        y="66"
-        width="892"
-        height="892"
-        rx="218"
+        x="72"
+        y="72"
+        width="880"
+        height="880"
+        rx="208"
         fill="none"
-        stroke="#3b4653"
-        strokeWidth="12"
+        stroke="#33404e"
+        strokeWidth="16"
       />
       <path
-        d="M170 290c72-62 166-94 274-94 134 0 252 52 338 140"
+        d="M224 512h116l36-96 58 192 66-252 58 156h86l38-74 42 148 38-74h128"
         fill="none"
-        stroke="#7d8a99"
-        strokeWidth="14"
-        strokeLinecap="round"
-        opacity="0.22"
-      />
-      <path
-        d="M164 512h144c42 0 56-90 94-90 40 0 52 180 94 180 42 0 56-90 98-90h166"
-        fill="none"
-        stroke="#61d9f7"
-        strokeWidth="34"
+        stroke="#59d7ff"
+        strokeWidth="42"
         strokeLinecap="round"
         strokeLinejoin="round"
+        opacity="0.88"
       />
-      <path d="M420 350 420 674 650 512Z" fill="#5cd8f5" />
-      <path
-        d="M420 350 650 512 420 674"
+      <path d="M444 376 444 648 618 512Z" fill="#59d7ff" />
+      <circle
+        cx="512"
+        cy="512"
+        r="346"
         fill="none"
-        stroke="#c0f5ff"
+        stroke="#59d7ff"
         strokeWidth="8"
-        strokeLinejoin="round"
-        opacity="0.72"
+        opacity="0.12"
       />
     </svg>
   )
