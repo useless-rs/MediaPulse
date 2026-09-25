@@ -19,10 +19,13 @@ use windowing::WindowError;
 
 /// Starts the `MediaPulse` desktop application.
 ///
+/// When `initial_sources` is non-empty the first entry is loaded as soon as the
+/// window exists, so `mediapulse video.mkv` opens straight into playback.
+///
 /// # Errors
 /// Returns an error when Tauri cannot create the application, resolve the
 /// bundled media engine, or initialize the managed playback backend.
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run(initial_sources: Vec<String>) -> Result<(), Box<dyn Error>> {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -38,7 +41,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             commands::toggle_maximize_window,
             commands::close_window,
         ])
-        .setup(|app| {
+        .setup(move |app| {
             let window = windowing::create_main_window(app)?;
             let window_id = match windowing::native_window_id(&window) {
                 Ok(window_id) => Some(window_id),
@@ -50,7 +53,10 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             if !app.manage(state.clone()) {
                 return Err(std::io::Error::other("MediaPulse state was already managed").into());
             }
-            events::start_state_emitter(app.handle().clone(), state);
+            events::start_state_emitter(app.handle().clone(), state.clone());
+            if let Some(source) = initial_sources.first() {
+                state.load(source)?;
+            }
             Ok(())
         })
         .build(tauri::generate_context!())?;

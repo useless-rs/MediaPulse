@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   setMuted: vi.fn(),
   setFullscreen: vi.fn(),
   openMedia: vi.fn(),
+  subscribeFileDrop: vi.fn(),
   minimizeWindow: vi.fn(),
   toggleMaximizeWindow: vi.fn(),
   closeWindow: vi.fn(),
@@ -32,6 +33,7 @@ describe("MediaPulse player", () => {
     mocks.getBackendKind.mockResolvedValue("libmpv")
     mocks.getSnapshot.mockResolvedValue(EMPTY_SNAPSHOT)
     mocks.subscribe.mockResolvedValue(() => undefined)
+    mocks.subscribeFileDrop.mockResolvedValue(() => undefined)
     mocks.openMedia.mockResolvedValue([])
   })
 
@@ -70,6 +72,27 @@ describe("MediaPulse player", () => {
     })
     expect(
       await screen.findByRole("button", { name: "creator-reference.mkv, playing" }),
+    ).toBeInTheDocument()
+  })
+
+  it("loads a file dropped onto the window", async () => {
+    let deliverDrop: ((paths: string[]) => void) | undefined
+    mocks.subscribeFileDrop.mockImplementation(async (onPaths: (paths: string[]) => void) => {
+      deliverDrop = onPaths
+      return () => undefined
+    })
+    render(<App />)
+
+    await waitFor(() => {
+      expect(deliverDrop).toBeDefined()
+    })
+    deliverDrop?.(["/media/dropped-clip.mp4"])
+
+    await waitFor(() => {
+      expect(mocks.load).toHaveBeenCalledWith("/media/dropped-clip.mp4")
+    })
+    expect(
+      await screen.findByRole("button", { name: "dropped-clip.mp4, playing" }),
     ).toBeInTheDocument()
   })
 

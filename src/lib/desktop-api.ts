@@ -1,5 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
+import { getCurrentWebview } from "@tauri-apps/api/webview"
 import { open } from "@tauri-apps/plugin-dialog"
 
 import { clamp, fileTitle } from "./format"
@@ -86,6 +87,16 @@ const tauriDesktopApi: DesktopApi = {
     if (selected === null) return []
     return Array.isArray(selected) ? selected : [selected]
   },
+  subscribeFileDrop: async (onPaths) => {
+    const unlisten = await getCurrentWebview().onDragDropEvent((event) => {
+      if (event.payload.type === "drop" && event.payload.paths.length > 0) {
+        onPaths(event.payload.paths)
+      }
+    })
+    return () => {
+      void unlisten()
+    }
+  },
   minimizeWindow: () => invoke("minimize_window"),
   toggleMaximizeWindow: () => invoke("toggle_maximize_window"),
   closeWindow: () => invoke("close_window"),
@@ -151,6 +162,7 @@ const browserDesktopApi: DesktopApi = {
     }
   },
   openMedia: async () => [],
+  subscribeFileDrop: async () => () => undefined,
   minimizeWindow: async () => undefined,
   toggleMaximizeWindow: async () => undefined,
   closeWindow: async () => window.close(),

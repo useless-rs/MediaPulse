@@ -132,17 +132,44 @@ export function useMediaPulseController() {
     setAutoHideControlsState(enabled)
   }, [])
 
+  const playPaths = useCallback(async (paths: string[]) => {
+    const firstPath = paths[0]
+    if (firstPath === undefined) return
+    setPlaylistItems(toPlaylistItems(paths))
+    setSelectedPath(firstPath)
+    setPlaylistOpen(true)
+    await desktopApi.load(firstPath)
+  }, [])
+
   const openMedia = useCallback(async () => {
     await runAction(async () => {
-      const paths = await desktopApi.openMedia()
-      const firstPath = paths[0]
-      if (firstPath === undefined) return
-      setPlaylistItems(toPlaylistItems(paths))
-      setSelectedPath(firstPath)
-      setPlaylistOpen(true)
-      await desktopApi.load(firstPath)
+      await playPaths(await desktopApi.openMedia())
     })
-  }, [runAction])
+  }, [playPaths, runAction])
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined
+    let cancelled = false
+
+    void desktopApi
+      .subscribeFileDrop((paths) => {
+        void runAction(async () => {
+          await playPaths(paths)
+        })
+      })
+      .then((stop) => {
+        if (cancelled) {
+          stop()
+        } else {
+          unlisten = stop
+        }
+      })
+
+    return () => {
+      cancelled = true
+      unlisten?.()
+    }
+  }, [playPaths, runAction])
 
   const selectMedia = useCallback(
     (item: PlaylistItem) => {

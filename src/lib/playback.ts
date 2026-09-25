@@ -46,6 +46,7 @@ export interface DesktopApi {
   setMuted(muted: boolean): Promise<void>
   setFullscreen(enabled: boolean): Promise<void>
   openMedia(): Promise<string[]>
+  subscribeFileDrop(onPaths: (paths: string[]) => void): Promise<() => void>
   minimizeWindow(): Promise<void>
   toggleMaximizeWindow(): Promise<void>
   closeWindow(): Promise<void>
