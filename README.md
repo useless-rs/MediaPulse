@@ -1,85 +1,86 @@
 # MediaPulse
 
-MediaPulse is a private, offline-first desktop media player built with Tauri, React, Rust, and mpv. It combines a focused desktop player with an mpv-compatible command-line launcher in one GPLv3 project.
+A private, offline media player for Linux, macOS and Windows, plus `mp`, a
+drop-in command line player for the same engine.
 
-[Download the latest release](https://github.com/useless-rs/MediaPulse/releases)
+No accounts, no telemetry, no cloud processing. Playback runs locally through
+[mpv](https://mpv.io/).
 
-## Highlights
+## Install
 
-- Direct `libmpv` playback for the desktop application.
-- A bundled `mp` launcher that forwards arguments, streams, and exit codes unchanged to its bundled mpv sidecar.
-- Full-canvas player with an mpv-style OSC, keyboard shortcuts, local playlist, and a centered settings sheet.
-- No accounts, telemetry, cloud processing, or automatic system-mpv discovery.
-- Typed Rust playback contracts and event-driven React state.
-- Native Tauri dialogs for selecting local media.
+Grab a build for your platform from the
+[releases page](https://github.com/useless-rs/MediaPulse/releases). The bundle
+contains the app, the `mp` launcher and its own copy of mpv, so there is
+nothing else to install.
 
-## Desktop app
+### Install with Cargo
+
+```bash
+cargo install mediapulse
+```
+
+This builds from source, so it needs the platform toolchain: a C compiler,
+the mpv development headers (`libmpv-dev` on Debian and Ubuntu,
+`mpv-devel` on Fedora) and the Tauri system libraries
+(`libwebkit2gtk-4.1-dev`, `libgtk-3-dev` on Debian and Ubuntu).
+
+A Cargo install ships **no** mpv, because Cargo packages cannot carry a
+platform-native binary. The `mediapulse` app still uses your system's libmpv,
+but the `mp` launcher needs to be told where mpv is:
+
+```bash
+MEDIAPULSE_MPV_PATH=/usr/bin/mpv mp video.mkv
+```
+
+## Use the app
+
+Open a file with **Open media**, or drop one onto the window. The playlist
+sits on the right, and settings opens as a centred sheet.
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>Space</kbd> | Play or pause |
+| <kbd>←</kbd> <kbd>→</kbd> | Seek backward or forward |
+| <kbd>L</kbd> | Toggle playlist |
+| <kbd>S</kbd> | Open settings |
+| <kbd>F</kbd> | Toggle fullscreen |
+
+## Use `mp` from the terminal
+
+`mp` forwards every argument to mpv untouched, so anything mpv accepts works
+here too. It exits with mpv's exit code and writes mpv's output straight to
+your terminal.
+
+```bash
+mp video.mkv
+mp --volume=80 --no-fullscreen video.mkv
+mp --list-options
+```
+
+`mp` looks for mpv next to itself, inside the app bundle, and in
+`MEDIAPULSE_MPV_PATH`. It never searches your `PATH`, so the engine it picks is
+always the one that shipped with the app rather than whatever happens to be
+installed on the machine.
+
+## Development
 
 ```bash
 bun install
 bun run tauri dev
 ```
 
-Build installable bundles with:
+The workspace holds three pieces:
 
-```bash
-bun run tauri build
-```
-
-The release bundle contains the frontend, desktop executable, bundled mpv sidecar, and license metadata. Native libmpv runtimes remain platform-specific: the Linux package declares `libmpv2`, while release automation must supply the matching runtime for each target platform.
-
-## Install from Cargo
-
-Install the published desktop binary and its companion `mp` launcher with:
-
-```bash
-cargo install mediapulse
-```
-
-The default `libmpv` feature requires the platform mpv development package and Tauri system libraries at compile time. Linux distributions commonly provide `libmpv-dev`, `libwebkit2gtk-4.1-dev`, and `libgtk-3-dev`; see the Tauri prerequisites for your platform. The Cargo-installed desktop binary uses the system libmpv runtime, while downloadable desktop bundles carry their platform-native sidecar assets.
-
-Cargo packages cannot include a platform-native mpv sidecar. The Cargo-installed `mp` launcher therefore remains available but needs an explicit engine path, for example `MEDIAPULSE_MPV_PATH=/usr/bin/mpv mp video.mkv`; it never searches `PATH` automatically.
-
-## `mp` CLI
-
-The `mp` binary is installed beside the desktop executable in release bundles. It preserves the original argument vector and never searches `PATH` for an engine.
-
-```bash
-mp video.mkv
-mp --volume=80 --no-fullscreen video.mkv
-mp -volume 80 -no-fullscreen video.mkv
-mp --list-options
-```
-
-For local development only, an explicit engine path may be supplied:
-
-```bash
-MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv mp video.mkv
-```
-
-`MEDIAPULSE_MPV_PATH` is intentionally unsupported as a system-install mechanism: a missing explicit path is an error, and the launcher never falls back to `PATH`.
-
-## Keyboard shortcuts
-
-| Shortcut | Action |
+| Path | What it is |
 | --- | --- |
-| `Space` | Play or pause |
-| `←` / `→` | Seek backward or forward |
-| `L` | Toggle playlist |
-| `S` | Open settings |
-| `F` | Toggle fullscreen |
+| `src-tauri/` | Tauri shell, typed IPC commands and the `mp` binary |
+| `crates/mediapulse-core/` | Shared playback contract and the mpv adapters |
+| `src/` | React player shell |
 
-## Workspace
-
-- `src-tauri/` — Tauri desktop shell, window controls, typed IPC, and `mp` binary.
-- `crates/mediapulse-core/` — shared playback contract, direct libmpv adapter, sidecar adapter, and CLI argument handling.
-- `src/` — React player shell and interaction tests.
-- `design-system.json` — visual and interaction contract.
-
-## Quality gates
+Run the checks before opening a pull request:
 
 ```bash
-bun run check
+bun run check                      # lint, types, frontend tests
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features
@@ -87,11 +88,12 @@ cargo test --workspace --all-features
 
 ## Platform notes
 
-- macOS uses an overlay title bar with native traffic lights.
-- Windows and Linux use MediaPulse window controls backed by Tauri commands.
-- Linux video embedding currently uses native window IDs on X11. Wayland support requires a native surface/render-API path and is tracked as platform-specific engineering work.
-- Cargo installs provide the Rust binaries; self-contained desktop bundles are the recommended end-user distribution because native mpv libraries differ by platform.
+- Video is embedded through native window handles. On Linux that currently
+  means X11; under Wayland the app runs but cannot embed video into its own
+  window yet.
+- Bundled builds carry the mpv build for their own platform. If you are on
+  Linux, the `.deb`/`.AppImage` expect `libmpv2` at runtime.
 
 ## License
 
-MediaPulse is licensed under the GNU General Public License v3.0 or later. See [`LICENSE`](LICENSE).
+GPL-3.0-or-later. See [`LICENSE`](LICENSE).

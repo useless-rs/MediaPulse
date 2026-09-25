@@ -1,22 +1,43 @@
 # mediapulse
 
-The publishable Rust package for the MediaPulse desktop application and its `mp` companion CLI.
+The desktop app and the `mp` launcher, published together as one Cargo
+package.
 
-## Binaries
+| Binary | What it does |
+| --- | --- |
+| `mediapulse` | The Tauri desktop player. This is the package's default binary. |
+| `mp` | Terminal player. Forwards its arguments to mpv and exits with mpv's code. |
 
-- `mediapulse` — Tauri desktop player; this is Cargo's default binary.
-- `mp` — mpv-compatible launcher that resolves only an explicit or bundled engine.
+## Install
+
+```bash
+cargo install mediapulse
+```
+
+The default `libmpv` feature needs the platform mpv development package and
+the Tauri system libraries. See the [project README](../../README.md) for the
+package names per platform.
+
+Cargo packages cannot carry a platform-native mpv binary, so a Cargo install
+has no bundled engine. Point `mp` at one:
+
+```bash
+MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv mp video.mkv
+```
+
+`mp` resolves the engine from that variable, then from locations inside the app
+bundle, and never from `PATH`.
 
 ## Features
 
-- `libmpv` (default) — direct native playback backend for the desktop shell.
-- `sidecar` — JSON IPC sidecar backend and launcher support.
+- `libmpv` (default) — plays through libmpv in-process.
+- `sidecar` — talks to mpv over its JSON IPC socket instead. Used by the `mp`
+  launcher.
 
-Desktop release bundles are the recommended self-contained installation path because libmpv and mpv sidecars are native, platform-specific artifacts. Source builds require the corresponding Tauri and mpv development packages.
+Self-contained release bundles are the recommended way to install, because the
+mpv runtime is platform-specific and cannot be shipped inside a Cargo package.
 
-Cargo installs include the `mediapulse` desktop binary and the `mp` launcher, but cannot include a platform-native mpv sidecar. For Cargo-installed `mp`, pass an explicit engine path with `MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv`; the launcher never searches `PATH`.
-
-## Validation
+## Verify
 
 ```bash
 cargo test -p mediapulse --all-features
