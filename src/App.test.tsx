@@ -41,6 +41,23 @@ describe("MediaPulse player", () => {
     expect(container.querySelectorAll('svg[aria-label="MediaPulse"]')).toHaveLength(2)
   })
 
+  it("keeps the empty state focused before media is loaded", () => {
+    render(<App />)
+
+    expect(screen.queryByRole("region", { name: "Playback controls" })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Open playlist" })).toBeInTheDocument()
+    expect(screen.queryByText("Native playback, focused by design")).not.toBeInTheDocument()
+  })
+
+  it("does not repeat the playlist action while the queue is open", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Open playlist" }))
+
+    expect(screen.queryByRole("button", { name: "Open playlist" })).not.toBeInTheDocument()
+  })
+
   it("opens selected media and exposes it in the playlist", async () => {
     const user = userEvent.setup()
     mocks.openMedia.mockResolvedValue(["/media/creator-reference.mkv"])

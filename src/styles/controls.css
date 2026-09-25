@@ -48,6 +48,13 @@
   pointer-events: none;
 }
 
+.player-controls-layer--empty {
+  inset-block-end: 18px;
+  inset-inline: auto 20px;
+  inline-size: auto;
+  margin-inline: 0;
+}
+
 .osc {
   display: grid;
   grid-template-rows: 44px 22px;
@@ -214,10 +221,37 @@
   text-align: end;
 }
 
+.osc--empty {
+  display: flex;
+  align-items: center;
+  inline-size: auto;
+  min-block-size: 44px;
+  block-size: 44px;
+  grid-template-rows: 44px;
+  padding: 4px;
+  border-color: transparent;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.osc__empty-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 @media (max-width: 640px) {
   .player-controls-layer {
     inline-size: calc(100% - 24px);
     inset-block-end: 12px;
+  }
+
+  .player-controls-layer--empty {
+    inset-inline: auto 12px;
+    inline-size: auto;
   }
 
   .osc {

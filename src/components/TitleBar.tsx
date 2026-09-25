@@ -7,20 +7,12 @@ import { IconButton } from "./IconButton"
 interface TitleBarProps {
   appleStyle: boolean
   title: string
-  backendLabel: string
   onMinimize: () => void
   onMaximize: () => void
   onClose: () => void
 }
 
-export function TitleBar({
-  appleStyle,
-  title,
-  backendLabel,
-  onMinimize,
-  onMaximize,
-  onClose,
-}: TitleBarProps) {
+export function TitleBar({ appleStyle, title, onMinimize, onMaximize, onClose }: TitleBarProps) {
   return (
     <header
       className={cn("titlebar", appleStyle && "titlebar--apple")}
@@ -31,9 +23,6 @@ export function TitleBar({
         <BrandMark />
         <span className="titlebar__title" data-tauri-drag-region>
           {title}
-        </span>
-        <span className="titlebar__backend" data-tauri-drag-region>
-          {backendLabel}
         </span>
       </div>
 

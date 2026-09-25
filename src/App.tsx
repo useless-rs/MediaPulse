@@ -12,7 +12,7 @@ import { isApplePlatform } from "./lib/platform"
 export function App() {
   const { state, actions } = useMediaPulseController()
   const title = state.snapshot.mediaTitle || "MediaPulse"
-  const backendLabel = state.backendKind === "libmpv" ? "embedded" : "sidecar"
+  const hasMedia = state.snapshot.filename.length > 0
 
   return (
     <main
@@ -24,7 +24,6 @@ export function App() {
       <TitleBar
         appleStyle={isApplePlatform()}
         title={title}
-        backendLabel={backendLabel}
         onMinimize={() => void actions.runAction(desktopApi.minimizeWindow)}
         onMaximize={() => void actions.runAction(desktopApi.toggleMaximizeWindow)}
         onClose={() => void actions.runAction(desktopApi.closeWindow)}
@@ -35,6 +34,7 @@ export function App() {
           <EmptyStage
             snapshot={state.snapshot}
             errorMessage={state.errorMessage}
+            playlistOpen={state.playlistOpen}
             onOpenMedia={() => void actions.openMedia()}
             onOpenPlaylist={actions.togglePlaylist}
           />
@@ -42,7 +42,11 @@ export function App() {
           <AnimatePresence initial={false}>
             {state.controlsVisible ? (
               <motion.div
-                className="player-controls-layer"
+                className={
+                  hasMedia
+                    ? "player-controls-layer"
+                    : "player-controls-layer player-controls-layer--empty"
+                }
                 initial={state.reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={state.reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}

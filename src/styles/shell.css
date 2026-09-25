@@ -101,7 +101,7 @@ input:focus-visible {
   block-size: var(--titlebar-height);
   padding-inline: 12px 0;
   border-block-end: 1px solid var(--color-border-glass);
-  background: rgb(9 25 43 / 78%);
+  background: rgb(7 18 28 / 92%);
   backdrop-filter: blur(24px) saturate(130%);
   -webkit-backdrop-filter: blur(24px) saturate(130%);
   user-select: none;
@@ -111,7 +111,7 @@ input:focus-visible {
   block-size: var(--titlebar-height-apple);
   padding-inline-start: 78px;
   border-block-end-color: transparent;
-  background: rgb(9 25 43 / 52%);
+  background: rgb(7 18 28 / 82%);
 }
 
 .titlebar__identity {
@@ -130,18 +130,6 @@ input:focus-visible {
   letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.titlebar__backend {
-  padding: 3px 7px;
-  border: 1px solid var(--color-border-glass);
-  border-radius: 999px;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .titlebar__window-controls {
@@ -170,26 +158,26 @@ input:focus-visible {
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
-  inline-size: 24px;
-  block-size: 24px;
+  inline-size: 26px;
+  block-size: 26px;
   color: var(--color-text-primary);
 }
 
 .brand-mark--large {
-  inline-size: 72px;
-  block-size: 72px;
+  inline-size: 64px;
+  block-size: 64px;
 }
 
 .brand-mark__icon {
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  border-radius: 6px;
-  box-shadow: 0 0 22px rgb(89 215 255 / 22%);
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 24%);
 }
 
 .brand-mark--large .brand-mark__icon {
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 .primary-button,
@@ -214,7 +202,7 @@ input:focus-visible {
   border: 1px solid color-mix(in srgb, var(--color-accent) 70%, white);
   color: var(--color-stage-deep);
   background: var(--color-accent);
-  box-shadow: 0 8px 24px rgb(4 20 34 / 24%);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 18%);
 }
 
 .secondary-button {
@@ -271,8 +259,8 @@ input:focus-visible {
 
 .stage__atmosphere {
   background:
-    radial-gradient(circle at 50% 36%, rgb(89 215 255 / 12%), transparent 36%),
-    linear-gradient(145deg, var(--color-stage) 0%, var(--color-stage-deep) 58%, #10283c 100%);
+    radial-gradient(circle at 50% 38%, rgb(97 217 247 / 6%), transparent 30%),
+    linear-gradient(160deg, var(--color-stage) 0%, var(--color-stage-deep) 100%);
   transition: opacity 220ms var(--ease-snappy);
 }
 
@@ -290,8 +278,8 @@ input:focus-visible {
   display: flex;
   align-items: center;
   flex-direction: column;
-  max-inline-size: 520px;
-  padding: 32px;
+  max-inline-size: 420px;
+  padding: 24px;
   text-align: center;
 }
 
@@ -310,17 +298,17 @@ input:focus-visible {
 .panel-title {
   margin: 8px 0 0;
   color: var(--color-text-primary);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
 }
 
 .empty-stage__body {
-  max-inline-size: 42ch;
-  margin: 12px 0 0;
+  max-inline-size: 34ch;
+  margin: 10px 0 0;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -329,7 +317,7 @@ input:focus-visible {
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin-block-start: 24px;
+  margin-block-start: 18px;
 }
 
 .stage__now-playing,
@@ -367,11 +355,18 @@ input:focus-visible {
 }
 
 .stage-error {
-  inset-inline: 20px;
+  inset-inline: auto 20px;
   inset-block-end: 132px;
+  max-inline-size: min(520px, calc(100% - 40px));
   justify-content: center;
   padding: 10px 12px;
   color: var(--color-text-primary);
+}
+
+.stage-error--inline {
+  position: static;
+  max-inline-size: 100%;
+  margin-block-start: 16px;
 }
 
 .stage-error svg {

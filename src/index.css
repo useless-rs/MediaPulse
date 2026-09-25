@@ -13,18 +13,18 @@
     sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", monospace;
 
-  --color-stage: #244f78;
-  --color-stage-deep: #163757;
-  --color-controls: rgb(10 35 64 / 82%);
-  --color-controls-hover: rgb(22 56 91 / 90%);
-  --color-sidebar: rgb(18 31 46 / 76%);
-  --color-sheet: rgb(24 31 40 / 88%);
+  --color-stage: #1f3b52;
+  --color-stage-deep: #13283a;
+  --color-controls: rgb(8 22 34 / 90%);
+  --color-controls-hover: rgb(17 42 61 / 94%);
+  --color-sidebar: rgb(8 17 26 / 94%);
+  --color-sheet: rgb(18 27 36 / 94%);
   --color-text-primary: #f7fbff;
   --color-text-secondary: #b9cad8;
   --color-text-muted: #8197aa;
-  --color-border-glass: rgb(255 255 255 / 12%);
-  --color-border-strong: rgb(255 255 255 / 20%);
-  --color-accent: #59d7ff;
+  --color-border-glass: rgb(255 255 255 / 10%);
+  --color-border-strong: rgb(255 255 255 / 16%);
+  --color-accent: #61d9f7;
   --color-accent-pressed: #35bfe8;
   --color-destructive: #ff6969;
   --color-scrim: rgb(4 9 15 / 42%);

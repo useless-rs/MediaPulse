@@ -5,6 +5,7 @@ import { BrandMark } from "./BrandMark"
 interface EmptyStageProps {
   snapshot: PlaybackSnapshot
   errorMessage: string | null
+  playlistOpen: boolean
   onOpenMedia: () => void
   onOpenPlaylist: () => void
 }
@@ -12,10 +13,18 @@ interface EmptyStageProps {
 export function EmptyStage({
   snapshot,
   errorMessage,
+  playlistOpen,
   onOpenMedia,
   onOpenPlaylist,
 }: EmptyStageProps) {
   const hasMedia = snapshot.filename.length > 0
+  const error =
+    errorMessage === null ? null : (
+      <div className={hasMedia ? "stage-error" : "stage-error stage-error--inline"} role="alert">
+        <TriangleAlert aria-hidden="true" />
+        <span>{errorMessage}</span>
+      </div>
+    )
 
   return (
     <section
@@ -35,29 +44,24 @@ export function EmptyStage({
       ) : (
         <div className="empty-stage">
           <BrandMark size="large" />
-          <p className="empty-stage__eyebrow">Native playback, focused by design</p>
-          <h1 className="empty-stage__title">Your media, uninterrupted.</h1>
-          <p className="empty-stage__body">
-            Open a local file and MediaPulse will play it through its private embedded mpv engine.
-          </p>
+          <h1 className="empty-stage__title">Nothing playing yet.</h1>
+          <p className="empty-stage__body">Choose a local file to start.</p>
           <div className="empty-stage__actions">
             <button type="button" className="primary-button" onClick={onOpenMedia}>
               <FolderOpen aria-hidden="true" />
               Open media
             </button>
-            <button type="button" className="secondary-button" onClick={onOpenPlaylist}>
-              View playlist
-            </button>
+            {playlistOpen ? null : (
+              <button type="button" className="secondary-button" onClick={onOpenPlaylist}>
+                Open playlist
+              </button>
+            )}
           </div>
+          {error}
         </div>
       )}
 
-      {errorMessage !== null ? (
-        <div className="stage-error" role="alert">
-          <TriangleAlert aria-hidden="true" />
-          <span>{errorMessage}</span>
-        </div>
-      ) : null}
+      {hasMedia ? error : null}
     </section>
   )
 }

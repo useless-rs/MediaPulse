@@ -38,6 +38,18 @@ export function PlayerControls({
   const hasMedia = snapshot.filename.length > 0
   const progress = duration > 0 ? (snapshot.timePosition / duration) * 100 : 0
 
+  if (!hasMedia) {
+    return (
+      <section className="osc osc--empty" aria-label="Player utilities">
+        <div className="osc__empty-tools">
+          <IconButton label="Open settings" onClick={onOpenSettings}>
+            <Settings />
+          </IconButton>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="osc" aria-label="Playback controls">
       <div className="osc__top-row">
