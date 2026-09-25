@@ -1,4 +1,5 @@
 import { FolderOpen, TriangleAlert } from "lucide-react"
+import { isLinux } from "../lib/platform"
 import type { PlaybackSnapshot } from "../lib/playback"
 import { BrandMark } from "./BrandMark"
 
@@ -18,6 +19,7 @@ export function EmptyStage({
   onOpenPlaylist,
 }: EmptyStageProps) {
   const hasMedia = snapshot.filename.length > 0
+  const detachedVideoNotice = hasMedia && isLinux() ? "Picture is playing in its own window." : null
   const error =
     errorMessage === null ? null : (
       <div className={hasMedia ? "stage-error" : "stage-error stage-error--inline"} role="alert">
@@ -40,6 +42,9 @@ export function EmptyStage({
         <div className="stage__now-playing">
           <span className="stage__live-dot" aria-hidden="true" />
           <span>{snapshot.mediaTitle || snapshot.filename}</span>
+          {detachedVideoNotice ? (
+            <span className="stage__detached-note">{detachedVideoNotice}</span>
+          ) : null}
         </div>
       ) : (
         <div className="empty-stage">

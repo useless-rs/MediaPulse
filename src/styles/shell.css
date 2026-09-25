@@ -354,6 +354,11 @@ input:focus-visible {
   box-shadow: 0 0 12px var(--color-accent);
 }
 
+.stage__detached-note {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
 .stage-error {
   inset-inline: auto 20px;
   inset-block-end: 132px;

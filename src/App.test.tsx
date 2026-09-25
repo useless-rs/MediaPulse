@@ -37,6 +37,21 @@ describe("MediaPulse player", () => {
     mocks.openMedia.mockResolvedValue([])
   })
 
+  it("tells a Linux user the picture plays in its own window", async () => {
+    const platform = vi.spyOn(navigator, "platform", "get")
+    platform.mockReturnValue("Linux x86_64")
+    mocks.getSnapshot.mockResolvedValue({
+      ...EMPTY_SNAPSHOT,
+      filename: "/media/linux-clip.mp4",
+      mediaTitle: "linux-clip.mp4",
+    })
+
+    render(<App />)
+
+    expect(await screen.findByText("Picture is playing in its own window.")).toBeInTheDocument()
+    platform.mockRestore()
+  })
+
   it("renders the approved MediaPulse brand mark", () => {
     const { container } = render(<App />)
 
