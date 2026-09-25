@@ -14,6 +14,8 @@ The publishable Rust package for the MediaPulse desktop application and its `mp`
 
 Desktop release bundles are the recommended self-contained installation path because libmpv and mpv sidecars are native, platform-specific artifacts. Source builds require the corresponding Tauri and mpv development packages.
 
+Cargo installs include the `mediapulse` desktop binary and the `mp` launcher, but cannot include a platform-native mpv sidecar. For Cargo-installed `mp`, pass an explicit engine path with `MEDIAPULSE_MPV_PATH=/absolute/path/to/mpv`; the launcher never searches `PATH`.
+
 ## Validation
 
 ```bash

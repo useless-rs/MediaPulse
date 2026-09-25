@@ -38,6 +38,8 @@ cargo install mediapulse
 
 The default `libmpv` feature requires the platform mpv development package and Tauri system libraries at compile time. Linux distributions commonly provide `libmpv-dev`, `libwebkit2gtk-4.1-dev`, and `libgtk-3-dev`; see the Tauri prerequisites for your platform. The Cargo-installed desktop binary uses the system libmpv runtime, while downloadable desktop bundles carry their platform-native sidecar assets.
 
+Cargo packages cannot include a platform-native mpv sidecar. The Cargo-installed `mp` launcher therefore remains available but needs an explicit engine path, for example `MEDIAPULSE_MPV_PATH=/usr/bin/mpv mp video.mkv`; it never searches `PATH` automatically.
+
 ## `mp` CLI
 
 The `mp` binary is installed beside the desktop executable in release bundles. It preserves the original argument vector and never searches `PATH` for an engine.
