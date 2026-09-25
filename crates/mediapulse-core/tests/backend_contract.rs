@@ -48,3 +48,18 @@ fn libmpv_backend_reports_invalid_properties_as_typed_errors() {
 
     assert!(result.is_err());
 }
+
+#[test]
+fn libmpv_backend_without_a_window_still_opens_a_video_window() {
+    let backend = LibmpvBackend::new().expect("libmpv backend");
+
+    let force_window: String = backend
+        .player()
+        .get_property("force-window")
+        .expect("force-window property");
+
+    assert_eq!(
+        force_window, "yes",
+        "with no window to embed into, mpv must open its own video window instead of rendering nothing"
+    );
+}

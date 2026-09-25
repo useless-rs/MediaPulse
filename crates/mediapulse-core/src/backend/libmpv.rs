@@ -35,7 +35,6 @@ impl LibmpvBackend {
 
     fn build(window_id: Option<i64>) -> Result<Self, BackendError> {
         let mut builder = Mpv::builder().map_err(engine_error)?;
-        builder = builder.set_property("vo", "libmpv").map_err(engine_error)?;
         builder = builder
             .set_property("hwdec", "auto-safe")
             .map_err(engine_error)?;
@@ -46,9 +45,13 @@ impl LibmpvBackend {
         builder = builder.set_property("idle", "yes").map_err(engine_error)?;
         let builder = match window_id {
             Some(window_id) => builder
+                .set_property("vo", "libmpv")
+                .map_err(engine_error)?
                 .set_property("wid", window_id)
                 .map_err(engine_error)?,
-            None => builder,
+            None => builder
+                .set_property("force-window", "yes")
+                .map_err(engine_error)?,
         };
         let player = builder.build().map_err(engine_error)?;
         Ok(Self {
