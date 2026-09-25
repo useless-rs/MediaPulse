@@ -33,6 +33,11 @@ impl AppState {
         })
     }
 
+    #[cfg(test)]
+    pub(crate) fn with_backend(backend: Arc<dyn PlaybackBackend>) -> Self {
+        Self { backend }
+    }
+
     pub fn backend_kind(&self) -> mediapulse_core::backend::BackendKind {
         self.backend.backend_kind()
     }

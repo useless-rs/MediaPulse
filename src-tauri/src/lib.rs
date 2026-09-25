@@ -4,6 +4,9 @@ mod locale;
 mod state;
 mod windowing;
 
+#[cfg(test)]
+mod ipc_tests;
+
 use std::error::Error;
 use std::path::PathBuf;
 use std::sync::Arc;

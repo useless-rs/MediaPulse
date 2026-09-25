@@ -3,6 +3,8 @@
 // intentionally values even when the command body only reads from them.
 #![allow(clippy::needless_pass_by_value)]
 
+use std::sync::Arc;
+
 use mediapulse_core::backend::{
     BackendError, BackendKind, PlaybackCommand, PlaybackSnapshot, PropertyUpdate, PropertyValue,
 };
@@ -37,24 +39,24 @@ impl From<BackendError> for IpcError {
 }
 
 #[tauri::command]
-pub fn backend_kind(state: State<'_, AppState>) -> BackendKind {
+pub fn backend_kind(state: State<'_, Arc<AppState>>) -> BackendKind {
     state.backend_kind()
 }
 
 #[tauri::command]
-pub fn playback_snapshot(state: State<'_, AppState>) -> Result<PlaybackSnapshot, IpcError> {
+pub fn playback_snapshot(state: State<'_, Arc<AppState>>) -> Result<PlaybackSnapshot, IpcError> {
     state.snapshot().map_err(IpcError::from)
 }
 
 #[tauri::command]
-pub fn load_media(source: &str, state: State<'_, AppState>) -> Result<(), IpcError> {
+pub fn load_media(source: &str, state: State<'_, Arc<AppState>>) -> Result<(), IpcError> {
     state.load(source).map_err(IpcError::from)
 }
 
 #[tauri::command]
 pub fn playback_command(
     command: PlaybackCommand,
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
 ) -> Result<(), IpcError> {
     state.command(command).map_err(IpcError::from)
 }
@@ -62,7 +64,7 @@ pub fn playback_command(
 #[tauri::command]
 pub fn set_playback_property(
     update: PropertyUpdate,
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
 ) -> Result<(), IpcError> {
     state.set_property(update).map_err(IpcError::from)
 }
@@ -70,7 +72,7 @@ pub fn set_playback_property(
 #[tauri::command]
 pub fn get_playback_property(
     name: &str,
-    state: State<'_, AppState>,
+    state: State<'_, Arc<AppState>>,
 ) -> Result<PropertyValue, IpcError> {
     state.get_property(name).map_err(IpcError::from)
 }
