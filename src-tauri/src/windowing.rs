@@ -1,9 +1,12 @@
+#[cfg(not(target_os = "linux"))]
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 use tauri::{App, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+#[cfg(not(target_os = "linux"))]
 use thiserror::Error;
 
+#[cfg(not(target_os = "linux"))]
 #[derive(Debug, Error)]
 pub enum WindowError {
     #[error("could not access the native window handle: {0}")]
@@ -32,6 +35,7 @@ pub fn create_main_window(app: &App) -> tauri::Result<WebviewWindow> {
     Ok(window)
 }
 
+#[cfg(not(target_os = "linux"))]
 pub fn native_window_id(window: &WebviewWindow) -> Result<i64, WindowError> {
     let handle = window.window_handle()?;
     match handle.as_raw() {

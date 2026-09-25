@@ -51,6 +51,10 @@ impl LibmpvBackend {
                 .map_err(engine_error)?,
             None => builder
                 .set_property("force-window", "yes")
+                .map_err(engine_error)?
+                .set_property("border", "no")
+                .map_err(engine_error)?
+                .set_property("ontop", "yes")
                 .map_err(engine_error)?,
         };
         let player = builder.build().map_err(engine_error)?;

@@ -15,6 +15,7 @@ use tauri::Manager;
 
 pub use commands::IpcError;
 use state::AppState;
+#[cfg(not(target_os = "linux"))]
 use windowing::WindowError;
 
 /// Starts the `MediaPulse` desktop application.
@@ -43,11 +44,7 @@ pub fn run(initial_sources: Vec<String>) -> Result<(), Box<dyn Error>> {
         ])
         .setup(move |app| {
             let window = windowing::create_main_window(app)?;
-            let window_id = match windowing::native_window_id(&window) {
-                Ok(window_id) => Some(window_id),
-                Err(WindowError::Unsupported) => None,
-                Err(error) => return Err(Box::new(error)),
-            };
+            let window_id = embed_target(&window)?;
             locale::set_numeric_c()?;
             let state = Arc::new(AppState::new(window_id, bundled_sidecar())?);
             if !app.manage(state.clone()) {
@@ -63,6 +60,29 @@ pub fn run(initial_sources: Vec<String>) -> Result<(), Box<dyn Error>> {
 
     app.run(|_app_handle, _event| {});
     Ok(())
+}
+
+/// The window mpv should draw into, when the platform can provide one.
+///
+/// On Linux the webview owns the window's rendering surface and paints over
+/// it, so handing mpv that window id produces audio with an invisible picture:
+/// exactly the failure this is meant to avoid. There is no API to draw native
+/// content behind a `WebKitGTK` webview, so Linux always plays into a separate
+/// mpv window instead. That keeps the picture visible and the behaviour the
+/// same under X11, `XWayland` and native Wayland.
+#[cfg(target_os = "linux")]
+#[allow(clippy::unnecessary_wraps)]
+fn embed_target(_window: &tauri::WebviewWindow) -> Result<Option<i64>, Box<dyn Error>> {
+    Ok(None)
+}
+
+#[cfg(not(target_os = "linux"))]
+fn embed_target(window: &tauri::WebviewWindow) -> Result<Option<i64>, Box<dyn Error>> {
+    match windowing::native_window_id(window) {
+        Ok(window_id) => Ok(Some(window_id)),
+        Err(WindowError::Unsupported) => Ok(None),
+        Err(error) => Err(Box::new(error)),
+    }
 }
 
 fn bundled_sidecar() -> Option<PathBuf> {
