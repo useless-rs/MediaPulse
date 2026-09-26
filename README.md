@@ -86,6 +86,44 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features
 ```
 
+## Releasing
+
+The app depends on `mediapulse-core` **by version from crates.io**, not by
+path. A change to the core is therefore invisible to anyone who installs the
+app until the core itself is published. Publishing only the app ships a fixed
+shell wrapped around a stale core, which looks correct in review and in CI.
+
+So, when releasing:
+
+1. If `crates/mediapulse-core/` changed, bump `[workspace.package] version` in
+   the root `Cargo.toml` and publish the core first:
+
+   ```bash
+   cargo publish -p mediapulse-core
+   ```
+
+   Wait for it to appear on crates.io before continuing.
+
+2. Point `src-tauri/Cargo.toml` at that new core version, bump the app version,
+   then publish the app:
+
+   ```bash
+   cargo publish -p mediapulse
+   ```
+
+3. Install the published version and confirm the downloaded core is the one you
+   just published:
+
+   ```bash
+   cargo install mediapulse --version <new> --force
+   cargo install --list | grep -A1 mediapulse-core
+   ```
+
+CI fails the build when `mediapulse-core` source changes without a workspace
+version bump, and the workspace test suite covers the core directly. Both
+checks are necessary but neither replaces step 3: only installing the real
+published package proves the published graph is correct.
+
 ## Platform notes
 
 - Video is embedded into the app window through native window handles, which
