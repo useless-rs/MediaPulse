@@ -1924,7 +1924,7 @@ dependencies = [
 
 [[package]]
 name = "mediapulse"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "libc",
  "mediapulse-core",
@@ -1942,7 +1942,7 @@ dependencies = [
 
 [[package]]
 name = "mediapulse-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "rsmpv",
