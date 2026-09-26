@@ -20,6 +20,33 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail if mediapulse-core changed without a version bump
+        run: |
+          set -euo pipefail
+          before="${{ github.event.before }}"
+          if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            echo "No parent commit to compare against; skipping."
+            exit 0
+          fi
+          if ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+            echo "Parent commit $before not available; skipping."
+            exit 0
+          fi
+          if git diff --quiet "$before" HEAD -- crates/mediapulse-core/src crates/mediapulse-core/Cargo.toml; then
+            echo "mediapulse-core unchanged; nothing to guard."
+            exit 0
+          fi
+          if git diff --quiet "$before" HEAD -- Cargo.toml; then
+            echo "::error::mediapulse-core changed but the workspace version in Cargo.toml did not."
+            echo "Consumers resolve mediapulse-core from crates.io by version, so a source"
+            echo "change without a version bump is never published and ships stale code."
+            echo "Bump [workspace.package] version and publish mediapulse-core first."
+            exit 1
+          fi
+          echo "mediapulse-core changed and the workspace version was bumped. Good."
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
